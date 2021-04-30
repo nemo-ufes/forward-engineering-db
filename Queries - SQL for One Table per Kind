@@ -1,0 +1,353 @@
+Query 1: the credit rating of each customer.
+
+******* Created manually.
+select count(1)
+from (
+	select	person_id
+	,   	credit_rating
+	from	person
+    where	is_personal_customer = true
+
+	union all
+
+	select	organization_id
+	,   	credit_rating
+	from	organization
+    where   is_corporate_customer = true
+) as temp
+;
+
+****** Created by Ontop.
+select count(1)
+from(
+    SELECT  v5.`credit_rating2m11` AS `credit_rating2m11`
+    ,       v5.`organization_id1m1` AS `organization_id1m1`
+    ,       v5.`person_id1m2` AS `person_id1m2`
+    ,       v5.`v0` AS `v0`
+    FROM    (
+                SELECT  v1.`credit_rating` AS `credit_rating2m11`
+                ,       v1.`organization_id` AS `organization_id1m1`
+                ,       NULL AS `person_id1m2`
+                ,       0 AS `v0`
+                FROM    `organization` v1
+                WHERE(  v1.`credit_rating`          IS NOT NULL 
+                AND     (v1.`is_corporate_customer` = 1))
+        
+                UNION ALL 
+        
+                SELECT  v3.`credit_rating` AS `credit_rating2m11`
+                ,       NULL AS `organization_id1m1`
+                ,       v3.`person_id` AS `person_id1m2`
+                ,       1 AS `v0`
+                FROM    `person` v3
+                WHERE   (v3.`credit_rating`         IS NOT NULL 
+                AND     (v3.`is_personal_customer` = 1) 
+                AND     'ADULT'                     = v3.`life_phase_enum`)
+            ) v5
+) as temp
+;
+
+****** Ontop query optimized.
+select count(1)
+from(
+    SELECT  v5.`credit_rating2m11` AS `credit_rating2m11`
+    ,       v5.`organization_id1m1` AS `organization_id1m1`
+    ,       v5.`person_id1m2` AS `person_id1m2`
+    ,       v5.`v0` AS `v0`
+    FROM    (
+                SELECT  v1.`credit_rating` AS `credit_rating2m11`
+                ,       v1.`organization_id` AS `organization_id1m1`
+                ,       NULL AS `person_id1m2`
+                ,       0 AS `v0`
+                FROM    `organization` v1
+                WHERE(  (v1.`is_corporate_customer` = 1))
+        
+                UNION ALL 
+        
+                SELECT  v3.`credit_rating` AS `credit_rating2m11`
+                ,       NULL AS `organization_id1m1`
+                ,       v3.`person_id` AS `person_id1m2`
+                ,       1 AS `v0`
+                FROM    `person` v3
+                WHERE   ((v3.`is_personal_customer` = 1) )
+            ) v5
+) as temp
+;
+
+-------------------------------------------------------
+Query 2: the name of each child, along with the playground size of the schools inwhich the child is enrolled.
+
+******* Created manually.
+select	count(1)
+from(
+	select	p.name person_name
+	,   	e.grade
+	,   	o.name organization_name
+	,   	o.playground_size
+	from	person p
+	join	enrollment e
+	    	on	p.person_id		= e.person_id
+	join	organization o
+	    	on	e.organization_id	= o.organization_id
+) as temp
+;
+
+****** Created by Ontop.
+select  count(1)
+from(
+    SELECT  v2.`grade` AS `grade1m9`
+    ,       v3.`name` AS `name2m4`
+    ,       v1.`name` AS `name2m8`
+    ,       v3.`playground_size` AS `playground_size1m17`
+    FROM    `person` v1
+    ,       `enrollment` v2
+    ,       `organization` v3
+    WHERE(  v3.`playground_size`    IS NOT NULL 
+    AND     v1.`person_id`          = v2.`person_id` 
+    AND     v2.`organization_id`    = v3.`organization_id`
+    AND     'PRIMARYSCHOOL'         = v3.`organization_type_enum`)
+) as temp
+;
+
+****** Ontop query optimized.
+select  count(1)
+from(
+    SELECT  v2.`grade` AS `grade1m9`
+    ,       v3.`name` AS `name2m4`
+    ,       v1.`name` AS `name2m8`
+    ,       v3.`playground_size` AS `playground_size1m17`
+    FROM    `person` v1
+    ,       `enrollment` v2
+    ,       `organization` v3
+    WHERE(  v1.`person_id`          = v2.`person_id` 
+    AND     v2.`organization_id`    = v3.`organization_id`)
+) as temp
+;
+
+
+-------------------------------------------------------
+Query 3: the names of Brazilian citizens working in hospitalswith Italian customers; this query reveals also the names of these customers and thecontract values with the hospital.
+
+******* Created manually.
+select count(1)
+from(
+    select	p.name brazilian_name
+	,		p.birth_date
+	,		p.rg
+	,		em.salary
+	,		o.name organization_name
+	,		p2.name italian_name
+	,		sc.contract_value
+    from	person p
+    join	nationality n
+    	    on	p.person_id		        = n.person_id
+    	    and	n.nationality_enum	    = 'BRAZILIANCITIZEN'
+    join	employment em
+    	    on	p.person_id	        	= em.person_id
+    join	organization o
+    	    on	em.organization_id	    = o.organization_id
+    	    and	o.organization_type_enum = 'HOSPITAL'
+    join	supply_contract sc
+        	on	o.organization_id   	= sc.organization_id
+    join	person p2
+        	on	sc.person_id	    	= p2.person_id
+    join	nationality n2
+    	    on	p2.person_id		    = n2.person_id
+        	and	n2.nationality_enum	    = 'ITALIANCITIZEN'
+)as temp
+;
+
+****** Created by Ontop.
+select  count(1)
+from(
+SELECT  v9.`contract_value1m18` AS `contract_value1m18`
+,       v9.`name2m15` AS `name2m15`
+,       v9.`name2m4` AS `name2m4`
+,        v9.`name2m8` AS `name2m8`
+FROM    (SELECT DISTINCT v7.`contract_value` AS `contract_value1m18`
+        ,       v5.`employment_id` AS `employment_id1m5`
+        ,       v3.`name` AS `name2m15`
+        ,       v6.`name` AS `name2m4`
+        ,       v4.`name` AS `name2m8`
+        ,       v5.`organization_id` AS `organization_id1m6`
+        ,       v2.`person_id` AS `person_id1m30`
+        ,       v1.`person_id` AS `person_id1m57`
+        ,       v7.`supply_contract_id` AS `supply_contract_id1m1`
+        FROM    `nationality` v1
+        ,       `nationality` v2
+        ,       `person` v3
+        ,       `person` v4
+        ,       `employment` v5
+        ,       `organization` v6
+        ,       `supply_contract` v7
+        WHERE ( (v3.`is_personal_customer`  = 1) 
+        AND     v2.`person_id`              = v3.`person_id` 
+        AND     v1.`person_id`              = v4.`person_id` 
+        AND     v1.`person_id`              = v5.`person_id` 
+        AND     v5.`organization_id`        = v6.`organization_id` 
+        AND     v5.`organization_id`        = v7.`organization_id` 
+        AND     v2.`person_id`              = v7.`person_id` 
+        AND     'BRAZILIANCITIZEN'          = v1.`nationality_enum` 
+        AND     'ITALIANCITIZEN'            = v2.`nationality_enum` 
+        AND     'ADULT'                     = v3.`life_phase_enum` 
+        AND     'HOSPITAL'                  = v6.`organization_type_enum`)
+) v9
+) as temp
+;
+
+****** Ontop query optimized.
+select  count(1)
+from(
+SELECT  v9.`contract_value1m18` AS `contract_value1m18`
+,       v9.`name2m15` AS `name2m15`
+,       v9.`name2m4` AS `name2m4`
+,        v9.`name2m8` AS `name2m8`
+FROM    (SELECT DISTINCT v7.`contract_value` AS `contract_value1m18`
+        ,       v5.`employment_id` AS `employment_id1m5`
+        ,       v3.`name` AS `name2m15`
+        ,       v6.`name` AS `name2m4`
+        ,       v4.`name` AS `name2m8`
+        ,       v5.`organization_id` AS `organization_id1m6`
+        ,       v2.`person_id` AS `person_id1m30`
+        ,       v1.`person_id` AS `person_id1m57`
+        ,       v7.`supply_contract_id` AS `supply_contract_id1m1`
+        FROM    `nationality` v1
+        ,       `nationality` v2
+        ,       `person` v3
+        ,       `person` v4
+        ,       `employment` v5
+        ,       `organization` v6
+        ,       `supply_contract` v7
+        WHERE ( v2.`person_id`              = v3.`person_id` 
+        AND     v1.`person_id`              = v4.`person_id` 
+        AND     v1.`person_id`              = v5.`person_id` 
+        AND     v5.`organization_id`        = v6.`organization_id` 
+        AND     v5.`organization_id`        = v7.`organization_id` 
+        AND     v2.`person_id`              = v7.`person_id` 
+        AND     'BRAZILIANCITIZEN'          = v1.`nationality_enum` 
+        AND     'ITALIANCITIZEN'            = v2.`nationality_enum` 
+        AND     'HOSPITAL'                  = v6.`organization_type_enum`)
+) v9
+) as temp
+;
+
+-------------------------------------------------------
+Query 4: all data of organizations regardless of whether itis registered as a Hospital or Primary School.
+
+******* Created manually.
+select count(1)
+from(
+    select	o.name
+    ,   	o.credit_rating
+    ,   	o.credit_limit
+    ,	    capacity
+    ,	    playground_size
+    from	organization o
+    where   is_corporate_customer   = true
+) as temp
+;
+
+****** Created by Ontop.
+select count(1)
+from(
+    SELECT  v1.`capacity` AS `capacity1m2`
+    ,       v1.`credit_limit` AS `credit_limit1m14`
+    ,       v1.`credit_rating` AS `credit_rating2m11`
+    ,       v1.`name` AS `name2m8`
+    ,       v1.`playground_size` AS `playground_size1m1`
+    ,      v1.`organization_type_enum` AS `v0`
+    FROM  `organization` v1
+    WHERE(  v1.`credit_rating`          IS NOT NULL 
+    AND     (v1.`is_corporate_customer` = 1) 
+    AND     v1.`credit_limit`           IS NOT NULL)
+) as temp
+;
+
+****** Ontop query optimized.
+select count(1)
+from(
+    SELECT  v1.`capacity` AS `capacity1m2`
+    ,       v1.`credit_limit` AS `credit_limit1m14`
+    ,       v1.`credit_rating` AS `credit_rating2m11`
+    ,       v1.`name` AS `name2m8`
+    ,       v1.`playground_size` AS `playground_size1m1`
+    ,      v1.`organization_type_enum` AS `v0`
+    FROM  `organization` v1
+    WHERE(  (v1.`is_corporate_customer` = 1) )
+) as temp
+;
+
+
+-------------------------------------------------------
+Query 5: given the CI of an Italian citizen, thename of the Hospital with which he/she has a contract and the value of that contract.
+
+******* Created manually.
+select count(1)
+from(
+    select	p.name person_name
+    ,		sc.contract_value
+    ,		o.name organization_name
+    from	person p
+    join	supply_contract sc
+    		on	p.person_id        			= sc.person_id
+    join	organization o
+    		on	sc.organization_id			= o.organization_id
+            and o.organization_type_enum 	= 'HOSPITAL'
+    where	p.ci							= '229732380'
+) as temp
+;
+
+****** Created by Ontop.
+select count(1)
+from(
+    SELECT  v6.`contract_value1m18` AS `contract_value1m18`
+    ,       v6.`name2m6` AS `name2m6`
+    ,       v6.`name2m8` AS `name2m8`
+    FROM(   SELECT DISTINCT v3.`contract_value` AS `contract_value1m18`
+            ,       v4.`name` AS `name2m6`
+            ,       v1.`name` AS `name2m8`
+            ,       v3.`organization_id` AS `organization_id1m1`
+            ,       v1.`person_id` AS `person_id1m20`
+            ,       v3.`supply_contract_id` AS `supply_contract_id0m2`
+            FROM    `person` v1
+            ,       `nationality` v2
+            ,       `supply_contract` v3
+            ,       `organization` v4
+            WHERE(  (v1.`is_personal_customer`      = 1) 
+            AND     v1.`person_id`                  = v2.`person_id` 
+            AND     v1.`person_id`                  = v3.`person_id` 
+            AND     v3.`organization_id`            = v4.`organization_id` 
+            AND     '274124858'                     = v1.`ci` 
+            AND     'ADULT'                         = v1.`life_phase_enum` 
+            AND     'ITALIANCITIZEN'                = v2.`nationality_enum` 
+            AND     'HOSPITAL'                      = v4.`organization_type_enum`)
+    ) v6
+) as temp
+;
+
+****** Ontop query optimized.
+select count(1)
+from(
+    SELECT  v6.`contract_value1m18` AS `contract_value1m18`
+    ,       v6.`name2m6` AS `name2m6`
+    ,       v6.`name2m8` AS `name2m8`
+    FROM(   SELECT DISTINCT v3.`contract_value` AS `contract_value1m18`
+            ,       v4.`name` AS `name2m6`
+            ,       v1.`name` AS `name2m8`
+            ,       v3.`organization_id` AS `organization_id1m1`
+            ,       v1.`person_id` AS `person_id1m20`
+            ,       v3.`supply_contract_id` AS `supply_contract_id0m2`
+            FROM    `person` v1
+            ,       `nationality` v2
+            ,       `supply_contract` v3
+            ,       `organization` v4
+            WHERE(  v1.`person_id`                  = v2.`person_id` 
+            AND     v1.`person_id`                  = v3.`person_id` 
+            AND     v3.`organization_id`            = v4.`organization_id` 
+            AND     '274124858'                     = v1.`ci` 
+            AND     'ITALIANCITIZEN'                = v2.`nationality_enum` 
+            AND     'HOSPITAL'                      = v4.`organization_type_enum`)
+    ) v6
+) as temp
+;
+

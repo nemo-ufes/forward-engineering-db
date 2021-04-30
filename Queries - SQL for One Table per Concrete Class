@@ -1,0 +1,228 @@
+
+Query 1: the credit rating of each customer.
+
+******* Created manually.
+select count(1)
+    from (
+    select	person_id
+    ,	    credit_rating
+    from	personal_customer
+    
+    union all
+    
+    select	organization_id
+    ,	    credit_rating
+    from	corporate_customer
+) as temp;
+
+****** Created by Ontop.
+select  count(1)
+from(
+    SELECT  v5.`credit_rating2m18` AS `credit_rating2m18`
+    ,       v5.`organization_id1m2` AS `organization_id1m2`
+    ,       v5.`person_id1m1` AS `person_id1m1`
+    ,       v5.`v0` AS `v0`
+    FROM    (
+            	SELECT  v1.`credit_rating` AS `credit_rating2m18`
+                ,       NULL AS `organization_id1m2`
+                ,       v1.`person_id` AS `person_id1m1`
+                ,       0 AS `v0`
+            	FROM `personal_customer` v1
+        
+            	UNION ALL 
+        
+            	SELECT  v3.`credit_rating` AS `credit_rating2m18`
+                ,       v3.`organization_id` AS `organization_id1m2`
+                ,       NULL AS `person_id1m1`
+                ,       1 AS `v0`
+            	FROM `corporate_customer` v3
+            ) v5
+) as temp
+;
+
+
+-------------------------------------------------------
+Query 2: the name of each child, along with the playground size of the schools inwhich the child is enrolled.
+
+******* Created manually.
+select	count(1)
+from(
+	select	p.name person_name
+	,   	e.grade
+	,   	o.name organization_name
+	,   	ps.playground_size
+	from	person p
+	join	enrollment e
+	    	on	p.person_id		= e.person_id
+	join	organization o
+	    	on	e.organization_id	= o.organization_id
+	join	primary_school ps
+	    	on	o.organization_id	= ps.organization_id
+) as temp
+;
+
+****** Created by Ontop.
+select   count(1)
+from(
+    SELECT 	v2.`grade` AS `grade1m9`
+    ,       v3.`name` AS `name2m4`
+    ,       v1.`name` AS `name2m8`
+    ,       v4.`playground_size` AS `playground_size1m17`
+    FROM 	`person` v1
+    ,       `enrollment` v2
+    ,       `organization` v3
+    ,       `primary_school` v4
+    WHERE(	v4.`playground_size` 	IS NOT NULL 
+    AND 	v1.`person_id` 		= v2.`person_id` 
+    AND 	v2.`organization_id` 	= v3.`organization_id` 
+    AND 	v2.`organization_id` 	= v4.`organization_id`)
+) as temp
+;
+
+-------------------------------------------------------
+Query 3: the names of Brazilian citizens working in hospitalswith Italian customers; this query reveals also the names of these customers and thecontract values with the hospital.
+
+******* Created manually.
+select count(1)
+from(
+    select	p.name brazilian_name
+    ,   	p.birth_date
+    ,	    bc.rg
+    ,	    em.salary
+    ,	    o.name organization_name
+    ,	    p2.name italian_name
+    ,	    sc.contract_value
+    from	brazilian_citizen bc
+    join	person p
+    	    on	bc.person_id		= p.person_id
+    join	employment em
+    	    on	p.person_id			= em.person_id
+    join	organization o
+    	    on	em.organization_id	= o.organization_id
+    join	hospital h
+		    on	o.organization_id	= h.organization_id
+    join	supply_contract sc
+    	    on	o.organization_id	= sc.organization_id
+    join	person p2
+    	    on	sc.person_id		= p2.person_id
+    join	italian_citizen ic
+        	on	p2.person_id		= ic.person_id
+) as temp
+;
+
+****** Created by Ontop.
+select count(1)
+from(
+    SELECT  v7.`contract_value` AS `contract_value1m18`
+    ,       v1.`name` AS `name2m15`
+    ,       v6.`name` AS `name2m4`
+    ,       v2.`name` AS `name2m8`
+    FROM    `person` v1
+    ,       `person` v2
+    ,       `brazilian_citizen` v3
+    ,       `employment` v4
+    ,       `hospital` v5
+    ,       `organization` v6
+    ,       `supply_contract` v7
+    ,       `italian_citizen` v8
+    WHERE ( v1.`person_id`          = v3.`person_id` 
+    AND     v1.`person_id`          = v4.`person_id` 
+    AND     v4.`organization_id`    = v5.`organization_id` 
+    AND     v4.`organization_id`    = v6.`organization_id` 
+    AND     v4.`organization_id`    = v7.`organization_id` 
+    AND     v2.`person_id`          = v7.`person_id` 
+    AND     v2.`person_id`          = v8.`person_id`)
+) as temp
+;
+
+
+-------------------------------------------------------
+Query 4: all data of organizations regardless of whether itis registered as a Hospital or Primary School.
+
+
+******* Created manually.
+select count(1)
+from(
+    select	o.name
+    ,   	cc.credit_rating
+    ,   	cc.credit_limit
+    ,   	h.capacity
+    ,   	pc.playground_size
+    from	organization o
+    join	corporate_customer cc
+        	on	o.organization_id	= cc.organization_id
+    left join hospital h
+        	on	o.organization_id	= h.organization_id
+    left join primary_school pc
+        	on	o.organization_id	= pc.organization_id
+) as temp
+;
+
+****** Created by Ontop.
+select count(1)
+from(
+    SELECT  v3.`capacity` AS `capacity1m13`
+    ,       v2.`credit_limit` AS `credit_limit1m14`
+    ,       v2.`credit_rating` AS `credit_rating2m11`
+    ,       v1.`name` AS `name2m8`
+    ,       v4.`playground_size` AS `playground_size1m17`
+    FROM    (
+                (
+                    (`organization` v1
+                    JOIN `corporate_customer` v2 
+                    ON v1.`organization_id`     = v2.`organization_id` 
+                    )
+                    LEFT OUTER JOIN `hospital` v3 
+                    ON  (v3.`capacity` IS NOT NULL 
+                    AND     v1.`organization_id` = v3.`organization_id`) 
+                    )
+                    LEFT OUTER JOIN `primary_school` v4 
+                    ON  (v4.`playground_size`   IS NOT NULL 
+                    AND v1.`organization_id`    = v4.`organization_id`
+                ) 
+            )
+) as temp
+;
+
+
+-------------------------------------------------------
+Query 5: given the CI of an Italian citizen, thename of the Hospital with which he/she has a contract and the value of that contract.
+
+******* Created manually.
+select count(1)
+from(
+    select	p.name person_name
+    ,	    sc.contract_value
+    ,	    o.name organization_name
+    from	italian_citizen ic
+    join	person p
+        	on	ic.person_id		= p.person_id
+	join	supply_contract sc
+        	on	p.person_id			= sc.person_id
+    join	organization o
+        	on	sc.organization_id 	= o.organization_id
+	join	hospital h
+			on	o.organization_id	= h.organization_id
+    where	ic.ci = '229732380'
+) as temp
+;
+
+
+****** Created by Ontop.
+select count(1)
+from(
+    SELECT  v3.`contract_value` AS `contract_value1m18`
+    ,       v5.`name` AS `name2m6`
+    ,       v1.`name` AS `name2m8`
+    FROM    `person` v1
+    ,       `italian_citizen` v2
+    ,       `supply_contract` v3
+    ,       `hospital` v4
+    ,       `organization` v5
+    WHERE(  v1.`person_id`          = v2.`person_id` 
+    AND     v1.`person_id`          = v3.`person_id` 
+    AND     v3.`organization_id`    = v4.`organization_id` 
+    AND     v3.`organization_id`    = v5.`organization_id` 
+    AND     '274124858'             = v2.`ci`)
+) as temp
+;
