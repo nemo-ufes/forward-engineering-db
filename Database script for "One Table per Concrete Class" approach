@@ -1,0 +1,117 @@
+    CREATE TABLE IF NOT EXISTS person ( 
+             person_id               INTEGER        NOT NULL PRIMARY KEY
+    ,        name                    VARCHAR(20)    NOT NULL
+    ,        birth_date              DATE           NOT NULL
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS organization ( 
+             organization_id         INTEGER        NOT NULL PRIMARY KEY
+    ,        name                    VARCHAR(20)    NOT NULL
+    ,        address                 VARCHAR(20)    NOT NULL
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS primary_school ( 
+             organization_id         INTEGER        NOT NULL PRIMARY KEY
+    ,        playground_size         INTEGER        NULL
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS hospital ( 
+             organization_id         INTEGER        NOT NULL PRIMARY KEY
+    ,        capacity                INTEGER        NULL
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS brazilian_citizen ( 
+             person_id               INTEGER        NOT NULL PRIMARY KEY
+    ,        rg                      VARCHAR(20)    NOT NULL
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS italian_citizen ( 
+             person_id               INTEGER        NOT NULL PRIMARY KEY
+    ,        ci                      VARCHAR(20)    NOT NULL
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS employee ( 
+             person_id               INTEGER        NOT NULL PRIMARY KEY
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS personal_customer ( 
+             person_id               INTEGER        NOT NULL PRIMARY KEY
+    ,        credit_rating           DOUBLE         NOT NULL
+    ,        credit_card             VARCHAR(20)    NULL
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS corporate_customer ( 
+             organization_id         INTEGER        NOT NULL PRIMARY KEY
+    ,        credit_rating           DOUBLE         NOT NULL
+    ,        credit_limit            DOUBLE         NOT NULL
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS contractor ( 
+             organization_id         INTEGER        NOT NULL PRIMARY KEY
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS child ( 
+             person_id               INTEGER        NOT NULL PRIMARY KEY
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS adult ( 
+             person_id               INTEGER        NOT NULL PRIMARY KEY
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS employment ( 
+             employment_id           INTEGER        NOT NULL PRIMARY KEY
+    ,        organization_id         INTEGER        NOT NULL
+    ,        person_id               INTEGER        NOT NULL
+    ,        salary                  DOUBLE         NOT NULL
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS enrollment ( 
+             enrollment_id           INTEGER        NOT NULL PRIMARY KEY
+    ,        organization_id         INTEGER        NOT NULL
+    ,        person_id               INTEGER        NOT NULL
+    ,        grade                   INTEGER        NOT NULL
+    ); 
+    
+    CREATE TABLE IF NOT EXISTS supply_contract ( 
+             supply_contract_id      INTEGER        NOT NULL PRIMARY KEY
+    ,        organization_customer_id INTEGER        NULL
+    ,        person_id               INTEGER        NULL
+    ,        organization_id         INTEGER        NOT NULL
+    ,        contract_value          DOUBLE         NOT NULL
+    ); 
+    
+    
+    
+    ALTER TABLE primary_school ADD FOREIGN KEY ( organization_id ) REFERENCES organization ( organization_id );
+    
+    ALTER TABLE hospital ADD FOREIGN KEY ( organization_id ) REFERENCES organization ( organization_id );
+    
+    ALTER TABLE brazilian_citizen ADD FOREIGN KEY ( person_id ) REFERENCES person ( person_id );
+    
+    ALTER TABLE italian_citizen ADD FOREIGN KEY ( person_id ) REFERENCES person ( person_id );
+    
+    ALTER TABLE employee ADD FOREIGN KEY ( person_id ) REFERENCES adult ( person_id );
+    
+    ALTER TABLE personal_customer ADD FOREIGN KEY ( person_id ) REFERENCES adult ( person_id );
+    
+    ALTER TABLE corporate_customer ADD FOREIGN KEY ( organization_id ) REFERENCES organization ( organization_id );
+    
+    ALTER TABLE contractor ADD FOREIGN KEY ( organization_id ) REFERENCES organization ( organization_id );
+    
+    ALTER TABLE child ADD FOREIGN KEY ( person_id ) REFERENCES person ( person_id );
+    
+    ALTER TABLE adult ADD FOREIGN KEY ( person_id ) REFERENCES person ( person_id );
+    
+    ALTER TABLE employment ADD FOREIGN KEY ( organization_id ) REFERENCES organization ( organization_id );
+    
+    ALTER TABLE employment ADD FOREIGN KEY ( person_id ) REFERENCES employee ( person_id );
+    
+    ALTER TABLE enrollment ADD FOREIGN KEY ( organization_id ) REFERENCES primary_school ( organization_id );
+    
+    ALTER TABLE enrollment ADD FOREIGN KEY ( person_id ) REFERENCES child ( person_id );
+    
+    ALTER TABLE supply_contract ADD FOREIGN KEY ( organization_customer_id ) REFERENCES corporate_customer ( organization_id );
+    
+    ALTER TABLE supply_contract ADD FOREIGN KEY ( person_id ) REFERENCES personal_customer ( person_id );
+    
+    ALTER TABLE supply_contract ADD FOREIGN KEY ( organization_id ) REFERENCES contractor ( organization_id );
