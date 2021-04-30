@@ -1,0 +1,93 @@
+Query 1: the credit rating of each customer.
+
+PREFIX : <https://example.com#>
+SELECT ?id1 ?creditRating{
+
+  ?id1      a               :Customer ;
+	        :creditRating   ?creditRating .
+}
+
+
+-------------------------------------------------------
+Query 2: the name of each child, along with the playground size of the schools inwhich the child is enrolled.
+
+PREFIX : <https://example.com#>
+SELECT ?name_child ?grade ?name_school ?size{
+
+  ?id1      a                 :Child ;
+            :name             ?name_child .
+
+  ?id2      a                 :Enrollment ;
+            :grade            ?grade ;
+            :hasChild         ?id1 ;
+            :hasPrimarySchool ?id3.
+
+  ?id3      a                 :PrimarySchool ;
+            :name             ?name_school ;
+            :playgroundSize   ?size.
+}
+
+-------------------------------------------------------
+Query 3: the names of Brazilian citizens working in hospitalswith Italian customers; this query reveals also the names of these customers and thecontract values with the hospital.
+
+PREFIX : <https://example.com#>
+SELECT ?brazilianName ?organizationName ?contractValue ?italianName {
+  ?brazilainPerson    a                 :BrazilianCitizen ;
+                      :name             ?brazilianName .
+  ?employment         a                 :Employment ;
+                      :hasEmployee      ?brazilainPerson;
+                      :hasOrganization  ?hospital .
+  ?hospital           a                 :Hospital .
+  ?hospital           a                 :Contractor ;
+                      :name             ?organizationName .
+  ?contract           a                 :SupplyContract ;
+                      :hasContractor    ?hospital ;
+	              :hasCustomer      ?personalCustomer ;
+                      :contractValue    ?contractValue.
+  ?personalCustomer   a                 :PersonalCustomer .
+  ?personalCustomer   a	                :ItalianCitizen ;
+                      :name             ?italianName .
+}
+
+-------------------------------------------------------
+Query 4: all data of organizations regardless of whether itis registered as a Hospital or Primary School.
+
+PREFIX : <https://example.com#>
+SELECT ?name ?capacity ?playgroundSize ?creditRating ?creditLimit
+WHERE 
+{
+    ?organization    a              :CorporateCustomer ;
+                     :name           ?name ;
+                     :creditRating   ?creditRating ;
+                     :creditLimit    ?creditLimit . 
+    OPTIONAL { ?organization     a            :Hospital;
+                                :capacity     ?capacity.
+    }
+    OPTIONAL { ?organization     a               :PrimarySchool;
+                                :playgroundSize ?playgroundSize .
+    }
+}
+
+-------------------------------------------------------
+Query 5: given the CI of an Italian citizen, thename of the Hospital with which he/she has a contract and the value of that contract.
+
+PREFIX : <https://example.com#>
+
+select ?personName ?CI ?contract_value ?organizationName{
+
+  ?id1   a               :ItalianCitizen ;
+         :name           ?personName ;
+         :CI             ?CI.
+
+  ?id1    a              :PersonalCustomer.
+
+  ?id2    a              :SupplyContract ;
+          :hasCustomer   ?id1 ;
+          :contractValue ?contract_value ;
+          :hasContractor ?id3 .
+
+  ?id3    a              :Hospital;
+          :name          ?organizationName .
+
+  FILTER (?CI = '229732380') .
+}
