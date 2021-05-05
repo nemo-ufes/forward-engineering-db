@@ -1,4 +1,4 @@
-# Integration of OntoUML with Ontop: A Forward Approach
+# High-Level Data Access from Conceptual Models: A Forward Approach
 
 
  
