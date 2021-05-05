@@ -1,0 +1,124 @@
+[PrefixDeclaration]
+:       https://example.com#
+gufo:   http://purl.org/nemo/gufo#
+rdf:    http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:   http://www.w3.org/2000/01/rdf-schema#
+owl:    http://www.w3.org/2002/07/owl#
+xsd:    http://www.w3.org/2001/XMLSchema#
+
+[MappingDeclaration] @collection [[
+mappingId    RunExample-NamedEntity
+target       :RunExample/person/{person_id} a :NamedEntity ; :name {name}^^xsd:string .
+source       SELECT person.person_id, person.name 
+             FROM person 
+
+mappingId    RunExample-NamedEntity40
+target       :RunExample/organization/{organization_id} a :NamedEntity ; :name {name}^^xsd:string .
+source       SELECT organization.organization_id, organization.name 
+             FROM organization 
+
+mappingId    RunExample-Person
+target       :RunExample/person/{person_id} a :Person ; :birthDate {birth_date}^^xsd:dateTime .
+source       SELECT person.person_id, person.birth_date 
+             FROM person 
+
+mappingId    RunExample-Organization
+target       :RunExample/organization/{organization_id} a :Organization ; :address {address}^^xsd:string .
+source       SELECT organization.organization_id, organization.address 
+             FROM organization 
+
+mappingId    RunExample-BrazilianCitizen
+target       :RunExample/person/{person_id} a :BrazilianCitizen ; :RG {rg}^^xsd:string .
+source       SELECT person.person_id, person.rg 
+             FROM person 
+             INNER JOIN nationality
+                     ON person.person_id = nationality.person_id
+                     AND nationality.nationality_enum = 'BRAZILIANCITIZEN' 
+
+mappingId    RunExample-ItalianCitizen
+target       :RunExample/person/{person_id} a :ItalianCitizen ; :CI {ci}^^xsd:string .
+source       SELECT person.person_id, person.ci 
+             FROM person 
+             INNER JOIN nationality
+                     ON person.person_id = nationality.person_id
+                     AND nationality.nationality_enum = 'ITALIANCITIZEN' 
+
+mappingId    RunExample-Child
+target       :RunExample/person/{person_id} a :Child .
+source       SELECT person.person_id 
+             FROM person 
+             WHERE life_phase_enum = 'CHILD' 
+
+mappingId    RunExample-Adult
+target       :RunExample/person/{person_id} a :Adult .
+source       SELECT person.person_id 
+             FROM person 
+             WHERE life_phase_enum = 'ADULT' 
+
+mappingId    RunExample-PersonalCustomer
+target       :RunExample/person/{person_id} a :PersonalCustomer ; :creditCard {credit_card}^^xsd:string .
+source       SELECT person.person_id, person.credit_card 
+             FROM person 
+             WHERE is_personal_customer = TRUE 
+             AND   life_phase_enum = 'ADULT' 
+
+mappingId    RunExample-CorporateCustomer
+target       :RunExample/organization/{organization_id} a :CorporateCustomer ; :creditLimit {credit_limit}^^xsd:decimal .
+source       SELECT organization.organization_id, organization.credit_limit 
+             FROM organization 
+             WHERE is_corporate_customer = TRUE 
+
+mappingId    RunExample-Employee
+target       :RunExample/person/{person_id} a :Employee .
+source       SELECT person.person_id 
+             FROM person 
+             WHERE is_employee = TRUE 
+             AND   life_phase_enum = 'ADULT' 
+
+mappingId    RunExample-Employment
+target       :RunExample/employment/{employment_id} a :Employment ; :salary {salary}^^xsd:decimal ; :hasOrganization :RunExample/organization/{organization_id}  ; :hasEmployee :RunExample/person/{person_id}  .
+source       SELECT employment.employment_id, employment.salary, employment.organization_id, employment.person_id 
+             FROM employment 
+
+mappingId    RunExample-Customer
+target       :RunExample/organization/{organization_id} a :Customer ; :creditRating {credit_rating}^^xsd:decimal .
+source       SELECT organization.organization_id, organization.credit_rating 
+             FROM organization 
+             WHERE is_corporate_customer = TRUE 
+
+mappingId    RunExample-Customer41
+target       :RunExample/person/{person_id} a :Customer ; :creditRating {credit_rating}^^xsd:decimal .
+source       SELECT person.person_id, person.credit_rating 
+             FROM person 
+             WHERE is_personal_customer = TRUE 
+             AND   life_phase_enum = 'ADULT' 
+
+mappingId    RunExample-SupplyContract
+target       :RunExample/supply_contract/{supply_contract_id} a :SupplyContract ; :contractValue {contract_value}^^xsd:decimal ; :hasCustomer :RunExample/organization/{organization_customer_id}  ; :hasCustomer :RunExample/person/{person_id}  ; :hasContractor :RunExample/organization/{organization_id}  .
+source       SELECT supply_contract.supply_contract_id, supply_contract.contract_value, supply_contract.organization_customer_id, supply_contract.person_id, supply_contract.organization_id 
+             FROM supply_contract 
+
+mappingId    RunExample-PrimarySchool
+target       :RunExample/organization/{organization_id} a :PrimarySchool ; :playgroundSize {playground_size}^^xsd:int .
+source       SELECT organization.organization_id, organization.playground_size 
+             FROM organization 
+             WHERE organization_type_enum = 'PRIMARYSCHOOL' 
+
+mappingId    RunExample-Hospital
+target       :RunExample/organization/{organization_id} a :Hospital ; :capacity {capacity}^^xsd:int .
+source       SELECT organization.organization_id, organization.capacity 
+             FROM organization 
+             WHERE organization_type_enum = 'HOSPITAL' 
+
+mappingId    RunExample-Enrollment
+target       :RunExample/enrollment/{enrollment_id} a :Enrollment ; :grade {grade}^^xsd:int ; :hasChild :RunExample/person/{person_id}  ; :hasPrimarySchool :RunExample/organization/{organization_id}  .
+source       SELECT enrollment.enrollment_id, enrollment.grade, enrollment.person_id, enrollment.organization_id 
+             FROM enrollment 
+
+mappingId    RunExample-Contractor
+target       :RunExample/organization/{organization_id} a :Contractor .
+source       SELECT organization.organization_id 
+             FROM organization 
+             WHERE is_contractor = TRUE 
+
+]]
